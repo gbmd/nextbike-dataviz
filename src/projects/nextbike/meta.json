@@ -1,0 +1,16 @@
+{
+  "title": "Bike Sharing Flows",
+  "center": [
+    11.576124,
+    50.137154
+  ],
+  "zoom": 4,
+  "minZoom": 4,
+  "layers": [
+    {
+      "name": "Analysierte Städte mit Mieträdern",
+      "path": "layers/city_data.geojson",
+      "visible": true
+    }
+  ]
+}
