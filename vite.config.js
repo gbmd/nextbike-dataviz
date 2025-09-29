@@ -14,7 +14,7 @@ export default defineConfig({
     host: true,              // == '0.0.0.0'
     port: 5173,
     strictPort: true,
-    allowedHosts: ['bikesharingpaper.duckdns.org'],
+    allowedHosts: ['dataviz.nefton.de'],
     // If you access through HTTPS reverse proxy, uncomment:
     // hmr: { host: 'datsimiaa.ftm.ed.tum.de' }
     watch: {
@@ -27,6 +27,6 @@ export default defineConfig({
   preview: {
     host: '0.0.0.0',
     port: 4173,
-    allowedHosts: ['bikesharingpaper.duckdns.org']
+    allowedHosts: ['dataviz.nefton.de']
   },
 })
