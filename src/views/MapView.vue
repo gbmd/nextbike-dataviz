@@ -5,7 +5,6 @@ import { defineAsyncComponent } from 'vue'
 import '@nanoandrew4/vue3-carousel-3d/dist/style.css'
 
 import CustomPanelContainer from '@/projects/nextbike/CustomPanelContainer.vue'
-import ZoomControl from '@/components/MainView/ZoomControl.vue'
 import LayerControl from '@/components/LayerControl.vue'
 import MapCanvas from '@/components/MapCanvas.vue'
 import MapLegend from '@/components/MapLegend.vue'
@@ -94,30 +93,6 @@ const bannerStyle = computed(() => ({
 
 function findProjectIndex(id) {
   return projects.findIndex((project) => project.id === id)
-}
-
-function findProjectId(index) {
-  if (index < 0 || index >= projects.length) return null
-  return projects[index].id
-}
-
-function prevScenario() {
-  activeIdx.value = (activeIdx.value - 1 + projects.length) % projects.length
-}
-
-function nextScenario() {
-  activeIdx.value = (activeIdx.value + 1) % projects.length
-}
-
-function updateCarouselPosition(index) {
-  if (!carousel3dRef.value) return
-
-  if (typeof carousel3dRef.value.goToSlide === 'function') {
-    carousel3dRef.value.goToSlide(index)
-  }
-  if (carousel3dRef.value.currentIndex !== undefined) {
-    carousel3dRef.value.currentIndex = index
-  }
 }
 
 // ----------------------------------------
@@ -210,7 +185,6 @@ function handleLoadFlowMap(flowsURL, locationsURL) {
   });
 }
 
-
 function handleJumpTo(lon, lat, zoom) {
   let map = mapRef.value.map;
   map.jumpTo({
@@ -224,7 +198,7 @@ function handleMapReady() {
   // console.log('Map ',projectId, ' is ready, updating layer info')
   updateLayerInfo()
   updateLegendVisibility()
-  // loadFlowMap()
+  // handleLoadFlowMap()
 }
 
 function updateLegendVisibility() {
@@ -233,7 +207,6 @@ function updateLegendVisibility() {
     // console.log('Updated legend visibility:', shouldShowLegend.value)
   }
 }
-
 
 function handleMapFilter(id, filter, value) {
   // console.log('Updating layer filter configuration', id, filter, value)
@@ -269,118 +242,6 @@ function handleLayerToggle(layerId) {
   }
 }
 
-// ----------------------------------------
-// Touch-swipe interaction for scenarios
-// ----------------------------------------
-function applyTouchInteraction(node) {
-  let startX = null
-  let startY = null
-  let hasMoved = false
-
-  node.el.addEventListener(
-    'touchstart',
-    (e) => {
-      if (e.touches && e.touches.length > 0) {
-        startX = e.touches[0].clientX
-        startY = e.touches[0].clientY
-        hasMoved = false
-        // console.log('Touch start:', startX, startY)
-      }
-    },
-    { passive: true }
-  )
-
-  node.el.addEventListener(
-    'touchmove',
-    (e) => {
-      if (
-        startX === null ||
-        startY === null ||
-        !e.touches ||
-        e.touches.length === 0
-      )
-        return
-
-      const dx = startX - e.touches[0].clientX
-      const dy = startY - e.touches[0].clientY
-
-      // Ignore vertical scrolls
-      if (Math.abs(dy) > Math.abs(dx)) return
-
-      if (Math.abs(dx) > 5) {
-        hasMoved = true
-      }
-    },
-    { passive: true }
-  )
-
-  node.el.addEventListener(
-    'touchend',
-    (e) => {
-      if (hasMoved && startX !== null && startY !== null) {
-        const endX = e.changedTouches[0].clientX
-        const dx = startX - endX
-        const minSwipe = 50
-
-        if (Math.abs(dx) >= minSwipe) {
-          if (dx > 0) {
-            nextScenario()
-            // console.log('Swiped left, next scenario:', activeScenario.value)
-          } else {
-            prevScenario()
-            // console.log('Swiped right, previous scenario:', activeScenario.value)
-          }
-          e.preventDefault()
-        }
-      }
-      startX = null
-      startY = null
-      hasMoved = false
-    }
-  )
-}
-
-// ----------------------------------------
-// Watchers: Persist view mode and synchronize state
-// ----------------------------------------
-watch(viewMode, (newMode) => {
-  localStorage.setItem('datentischViewMode', newMode)
-  // console.log('View mode changed to:', newMode)
-})
-
-// When the route param "id" changes, update carousel and active index
-watch(
-  () => route.params.id,
-  async (newProjectId) => {
-    if (!newProjectId) return
-
-    const idx = findProjectIndex(newProjectId)
-    if (idx !== -1) {
-      carouselActiveIndex.value = idx
-      activeIdx.value = idx
-
-      await nextTick()
-      updateCarouselPosition(idx)
-    }
-  },
-  { immediate: true }
-)
-
-// Whenever activeIdx changes: load scenario on map and log
-watch(activeIdx, (newIndex) => {
-  const projectId = projects[newIndex]?.id
-  if (mapRef.value?.loadScenario && projectId) {
-    mapRef.value.loadScenario(projectId).then(() => {
-      updateLegendVisibility()
-    }).catch((err) => {
-      console.error('Error loading scenario:', err)
-    })
-  }
-  // console.log('activeIdx changed:', newIndex)
-  // console.log('New active scenario:', activeScenario.value)
-  // console.log('New title:', scenarioTitle.value)
-  // console.log('New panel file:', scenarioFile.value)
-})
 
 // Whenever activeScenario changes: wait for mapRef then load scenario
 watch(
@@ -412,14 +273,6 @@ watch(
   { immediate: false }
 )
 
-// After activeScenario updates, update layers
-watch(
-  activeScenario,
-  async () => {
-    await nextTick()
-    updateLayerInfo()
-  }
-)
 
 // ----------------------------------------
 // Lifecycle: mounted and updated hooks
@@ -443,7 +296,6 @@ onMounted(async () => {
       // )
 
       await nextTick()
-      updateCarouselPosition(idx)
     } else if (projects.length > 0) {
       activeScenario.value = projects[0].id
       // console.log('Fallback to first project:', projects[0].id)
@@ -458,16 +310,6 @@ onUpdated(() => {
   // console.log('MapView component updated')
 })
 
-// ----------------------------------------
-// Logging available projects on startup
-// ----------------------------------------
-/*
-console.log('Found projects:')
-for (const [path, mod] of Object.entries(metaFiles)) {
-  const id = path.split('/').slice(-2, -1)[0]
-  console.log(`  ${id}: ${mod.default?.title ?? id}`)
-}
-*/
 
 </script>
 
@@ -481,13 +323,9 @@ for (const [path, mod] of Object.entries(metaFiles)) {
     <template v-if="viewMode === 'blocks'">
       <div class="blocks-wrapper" :style="bannerStyle">
         <!-- ONE grid that morphs via classes -->
-        <div class="grid-container" :class="{
-          'map-only': isMapOnly,
-          'two-panels': BlockLeftPanelContainer && BlockRightPanelContainer,
-          'one-panel-map': isOneContainer && !(BlockLeftPanelContainer && BlockRightPanelContainer)
-        }">
+        <div class="grid-container one-panel-map">
           <!-- Info (kept mounted across layout changes) -->
-          <div class="block block-description" v-show="!!scenarioFile">
+          <div class="block block-description">
             <CustomPanelContainer :key="`desc-${activeScenario}`" @jumpTo="handleJumpTo"
               @toggle-layer="handleLayerToggle" @loadFlowMap="handleLoadFlowMap" :project="scenarioTitle" :file="scenarioFile" idName="split-frame"
               :top="false" split-mode @setFilter="handleMapFilter"  />
@@ -511,11 +349,6 @@ for (const [path, mod] of Object.entries(metaFiles)) {
     <div v-if="!activeScenario" class="map-loading">
       <div class="map-loading-spinner"></div>
       <div class="map-loading-text">Loading map...</div>
-    </div>
-
-    <!-- Zoom control (visible when not in blocks view) -->
-    <div v-if="viewMode !== 'blocks'" class="top-zoom" :class="{ 'split-view-zoom': viewMode === 'split' }">
-      <ZoomControl />
     </div>
 
     <!-- Layer control -->
