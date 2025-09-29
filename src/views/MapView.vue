@@ -18,12 +18,6 @@ import { getPrimaryBannerUrl, getFallbackBannerUrl } from '@/utils/bannerUtils'
 // Import project metadata and custom panels
 // ----------------------------------------
 
-// Eagerly import all CustomPanelContainer.vue files in projects
-const customPanelContainers = import.meta.glob(
-  '@/projects/**/*PanelContainer.vue',
-  { eager: true }
-)
-
 // Scan each project folder for meta.json (eagerly loaded)
 const metaFiles = import.meta.glob('@/projects/**/meta.json', { eager: true })
 
@@ -41,7 +35,6 @@ const mapSettings = {
 // ----------------------------------------
 // Reactive state and computed properties
 // ----------------------------------------
-const router = useRouter()
 const route = useRoute()
 
 // View mode: 'distributed' or 'blocks', persisted to localStorage
