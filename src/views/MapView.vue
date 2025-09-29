@@ -4,10 +4,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { defineAsyncComponent } from 'vue'
 import '@nanoandrew4/vue3-carousel-3d/dist/style.css'
 
-import DefaultPanelContainer from '@/components/MainView/PanelContainer.vue'
+import CustomPanelContainer from '@/projects/nextbike/CustomPanelContainer.vue'
 import ZoomControl from '@/components/MainView/ZoomControl.vue'
 import LayerControl from '@/components/LayerControl.vue'
-import ProjectCarousel from '@/components/ProjectCarousel.vue'
 import MapCanvas from '@/components/MapCanvas.vue'
 import MapLegend from '@/components/MapLegend.vue'
 import { MapboxOverlay } from "@deck.gl/mapbox";
@@ -39,21 +38,6 @@ const mapSettings = {
   attributionControl: false
 }
 
-// ----------------------------------------
-// Utilities: Custom container resolver
-// ----------------------------------------
-function useCustomContainer(componentName, fallback = DefaultPanelContainer) {
-  return computed(() => {
-    const project = activeScenario.value
-    if (!project) return fallback
-
-    // Vite's glob keys use "/" and are relative to /src
-    const customPath = `/src/projects/${project}/${componentName}.vue`
-    return customPanelContainers[customPath]
-      ? customPanelContainers[customPath].default
-      : fallback
-  })
-}
 
 // ----------------------------------------
 // Reactive state and computed properties
@@ -62,7 +46,7 @@ const router = useRouter()
 const route = useRoute()
 
 // View mode: 'distributed' or 'blocks', persisted to localStorage
-const viewMode = ref(localStorage.getItem('datentischViewMode') || 'distributed')
+const viewMode = 'blocks'
 
 // List of all projects: id, title, thumbnail
 const projects = Object.entries(metaFiles)
@@ -98,22 +82,6 @@ const mapRef = ref(null)
 const mapLayers = ref([])
 const shouldShowLegend = ref(true) // Track if legend should be visible for current project
 
-// Derived flag: whether to show map alone (no left/right panels)
-const BlockLeftPanelContainer = useCustomContainer(
-  'BlockLeftPanelContainer',
-  false
-)
-const BlockRightPanelContainer = useCustomContainer(
-  'BlockRightPanelContainer',
-  false
-)
-const isMapOnly = computed(() => {
-  return !BlockLeftPanelContainer.value && !BlockRightPanelContainer.value
-})
-const isOneContainer = computed(() => {
-  return !BlockLeftPanelContainer.value !== !BlockRightPanelContainer.value
-})
-
 // Banner style for blocks view
 const bannerStyle = computed(() => ({
   backgroundColor: '#f5f5f5', // or any consistent color
@@ -121,24 +89,8 @@ const bannerStyle = computed(() => ({
   padding: '2rem'
 }))
 
-
-// Main panel container (custom or default)
-const MainPanelContainer = useCustomContainer(
-  'CustomPanelContainer',
-  DefaultPanelContainer
-)
-
 // ----------------------------------------
 // Functions: Navigation, view mode, projects
-// ----------------------------------------
-function goHome() {
-  router.push({ name: 'Home' })
-}
-
-function setViewMode(mode) {
-  viewMode.value = mode
-  localStorage.setItem('datentischViewMode', mode)
-}
 
 function findProjectIndex(id) {
   return projects.findIndex((project) => project.id === id)
@@ -147,25 +99,6 @@ function findProjectIndex(id) {
 function findProjectId(index) {
   if (index < 0 || index >= projects.length) return null
   return projects[index].id
-}
-
-function selectScenario(index) {
-  // Remove flow overlay if exists
-  if (deckOverlayInstance) {
-    try {
-      mapRef.value.map.removeControl(deckOverlayInstance);
-      // console.log('Removed existing flow overlay on scenario select');
-    } catch (err) {
-      console.warn('Error removing existing flow overlay on scenario select:', err);
-    }
-    deckOverlayInstance = null;
-  }
-
-  if (index !== -1) {
-    activeIdx.value = index
-    carouselActiveIndex.value = index
-    activeScenario.value = findProjectId(index)
-  }
 }
 
 function prevScenario() {
@@ -184,56 +117,6 @@ function updateCarouselPosition(index) {
   }
   if (carousel3dRef.value.currentIndex !== undefined) {
     carousel3dRef.value.currentIndex = index
-  }
-}
-
-function updateActiveProject(index) {
-  // Remove flow overlay if exists
-  if (deckOverlayInstance && mapRef.value && mapRef.value.map) {
-    try {
-      mapRef.value.map.removeControl(deckOverlayInstance);
-      // console.log('Removed existing flow overlay on project switch');
-    } catch (err) {
-      console.warn('Error removing flow overlay on project switch:', err);
-    }
-    deckOverlayInstance = null;
-  }
-  if (index == activeIdx.value) return
-  if (index < 0 || index >= projects.length) {
-    console.error('Invalid project index:', index)
-    return
-  }
-
-  activeIdx.value = index
-  const project = projects[index]
-  if (!project || !project.id) {
-    console.error('Invalid project at index:', index, project)
-    return
-  }
-
-  const projectId = project.id
-  activeScenario.value = projectId
-
-  router.replace(
-    {
-      name: 'Table',
-      params: { id: projectId }
-    },
-    { replace: true }
-  ).catch(err => {
-    console.error('Router navigation error:', err)
-  })
-
-  if (mapRef.value && typeof mapRef.value.loadScenario === 'function') {
-    mapRef.value
-      .loadScenario(projectId)
-      .then(() => {
-        // console.log('Loaded scenario from carousel:', projectId)
-        updateLegendVisibility()
-      })
-      .catch((err) => {
-        console.error('Error loading scenario:', err)
-      })
   }
 }
 
@@ -605,7 +488,7 @@ for (const [path, mod] of Object.entries(metaFiles)) {
         }">
           <!-- Info (kept mounted across layout changes) -->
           <div class="block block-description" v-show="!!scenarioFile">
-            <MainPanelContainer :key="`desc-${activeScenario}`" @jumpTo="handleJumpTo"
+            <CustomPanelContainer :key="`desc-${activeScenario}`" @jumpTo="handleJumpTo"
               @toggle-layer="handleLayerToggle" @loadFlowMap="handleLoadFlowMap" :project="scenarioTitle" :file="scenarioFile" idName="split-frame"
               :top="false" split-mode @setFilter="handleMapFilter"  />
           </div>
