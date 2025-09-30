@@ -1,11 +1,1 @@
-# Ensure files inside dist/ are NOT handled by LFS
-# (explicit directory patterns take precedence / are the longest match)
-dist/** -filter -merge -diff -text
-
-# Track large/binary file types with Git LFS
-*.geojson filter=lfs diff=lfs merge=lfs -text
-*.png     filter=lfs diff=lfs merge=lfs -text
-*.jpg     filter=lfs diff=lfs merge=lfs -text
-*.csv     filter=lfs diff=lfs merge=lfs -text
-*.pptx    filter=lfs diff=lfs merge=lfs -text
 * !text !filter !merge !diff
