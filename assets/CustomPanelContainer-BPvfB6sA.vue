@@ -5,12 +5,12 @@
             <div v-html="html" style="overflow-x: hidden; touch-action: none; -ms-touch-action: none;"
                 @vue:updated="onHTMLMounted">
             </div>
-            <h1>Datenbasierte Einblicke in (E-)Bike-Sharing</h1>
-<p>Willkommen! Diese Website zeigt, wie Menschen gemeinsame Fahrräder und E-Bikes in Städten nutzen. Die Daten stammen aus vielen europäischen Systemen. Ziel: einfache, verständliche Einblicke für alle.</p>
+            <h1>Data-Driven Insights into (E-)Bike Sharing</h1>
+<p>Welcome! This site shows how people use shared bikes and e-bikes across 267 cities in Europe. The data comes from European bike sharing systems by Nextbike. We aim to enable everyone to gain simple, understandable insights about the bike sharing usage in their city.</p>
 <div class="spacer"></div>
 
-<h2>Erste Ansicht: 267 Städte</h2>
-<p>Zu Beginn sehen Sie eine Karte mit <b>267 Städten</b>. Jeder Punkt steht für ein Bike-Sharing-System. Die <b>Größe</b> des Punkts zeigt, wie groß das System ist (wie viele Räder es hat). Die <b>Farbe</b> kann die Nutzung zeigen (z. B. Fahrten pro Rad und Tag).</p>
+<h2>Overview: 267 Cities</h2>
+<p>The first view is a map of the <b>267 cities</b>. Each scatter point represents a bike-sharing system. The <b>size</b> of the dot shows how large the system is (how many bikes it has). The <b>color</b> can show usage - i.e. trips per day and bike (TDB). Click on a city to gain detailed insights!</p>
 <div class="blue-frame" style="width: 60%; margin: 2rem auto;">
     <!-- Additional custom content can be included here -->
 <div class="colormap">
@@ -22,40 +22,30 @@
         class="colormap-labels" 
         style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 4px;">
         <span>0.5</span>
-        <span>Fahrten pro Tag und Rad</span>
+        <span>Trips per day and bike</span>
         <span>3</span>
     </div>
 </div>
 </div>
 
-<p>So bekommen Sie schnell ein Gefühl: Wo sind sehr große Systeme? Wo wird besonders viel gefahren?</p>
 <div class="spacer"></div>
-<h2>Interaktive Flüsse</h2>
-<p>Mit einem Klick können Sie sehen, wie die Räder innerhalb einer Stadt fließen: von Start- zu Zielgebieten, über den Tag verteilt.</p>
+<h2>Interactive Flows</h2>
+<p>With one click you can watch how bikes move within a city: from origin to destination throughout the day.</p>
 <div style="width: 40%; margin: 2rem auto;">
             <button class="panel-button" @click="loadFlowmap">
-                Fahrradfahrten laden
+                Load bike trips
             </button>
 </div>
-<h2>Was kann ich lernen?</h2>
-<ul>
-  <li><b>Nutzung über den Tag:</b> Oft gibt es morgens und abends Spitzen, am Wochenende eher nachmittags.</li>
-  <li><b>E-Bikes vs. normale Räder:</b> E-Bikes werden etwas anders genutzt, oft für längere Wege.</li>
-  <li><b>Wichtige Faktoren:</b> Betriebszeiten, Größe des Einsatzgebiets, Anteil von E-Bikes, Radwege, Alter &amp; Geschlecht, Klima und Tourismus spielen eine Rolle.</li>
-  <li><b>Betrieb &amp; Laden:</b> Bei E-Bikes ist das Laden/Wechseln der Akkus wichtig für gute Verfügbarkeit.</li>
-  <li><b>Ziel:</b> Bessere Planung, bessere Auslastung, mehr Nachhaltigkeit.</li>
-</ul>
-<div class="spacer"></div>
 
-<h2>Springe direkt zu einer Stadt</h2>
-<p>Wählen Sie eine Stadt, um sofort in ihre Karte und Flüsse zu springen:</p>
+<h2>Jump Straight to a City</h2>
+<p>Select a city to jump right into its map and flow view, or scroll through Europe yourself!</p>
 
 <div  class="blue-frame">
 <div class="panel-content-flex" >
     <div class="panel-controls" style="gap: 1rem; margin-bottom: 1rem;">
             <div class="city-picker" style="margin-bottom: 1rem;">
                 <select v-model="activeCity" @change="selectCity" style="width: 100%; padding: 0.5rem;">
-                    <option value="" disabled selected>Stadt wählen</option>
+                    <option value="" disabled selected>Select city</option>
                     <option v-for="(coords, city) in cityMap" :key="city" :value="city">{{ city }}</option>
                 </select>
             </div>
@@ -63,26 +53,26 @@
             <button class="panel-button" 
                 :class="{'active-toggle': activeCity === 'Berlin'}"
                     @click="jumpTo(13.35, 52.5, 11, 'Berlin')">
-                  <img :src="flagSrc('de')" alt="Deutschland" width="24" height="18" style="vertical-align:middle;margin-right:.4rem;" />  
+                  <img :src="flagSrc('de')" alt="Germany" width="24" height="18" style="vertical-align:middle;margin-right:.4rem;" />  
                   Berlin
             </button>
             <button class="panel-button" 
                 :class="{'active-toggle': activeCity === 'Warschau'}"
                     @click="jumpTo(21.01, 52.22, 11, 'Warschau')">
-                <img :src="flagSrc('pl')" alt="Polen" width="24" height="18" style="vertical-align:middle;margin-right:.4rem;" />
+                <img :src="flagSrc('pl')" alt="Poland" width="24" height="18" style="vertical-align:middle;margin-right:.4rem;" />
                 Warschau
             </button>
             <button class="panel-button" 
                 :class="{'active-toggle': activeCity === 'Dresden'}"
                     @click="jumpTo(13.73, 51.05, 13, 'Dresden')">
-                <img :src="flagSrc('de')" alt="Deutschland" width="24" height="18" style="vertical-align:middle;margin-right:.4rem;" />
+                <img :src="flagSrc('de')" alt="Germany" width="24" height="18" style="vertical-align:middle;margin-right:.4rem;" />
                    Dresden
             </button>
             <button class="panel-button" 
                 :class="{'active-toggle': activeCity === 'Bilbao'}"
                     @click="jumpTo(-2.94, 43.26, 14.5, 'Bilbao')">
                 
-                <img :src="flagSrc('es')" alt="Spanien" width="24" height="18" style="vertical-align:middle;margin-right:.4rem;" />
+                <img :src="flagSrc('es')" alt="Spain" width="24" height="18" style="vertical-align:middle;margin-right:.4rem;" />
                    Bilbao
             </button>
         </div>
@@ -90,32 +80,41 @@
 </div>
     <div class="city-info-texts" style="gap: 1rem; margin-bottom: 1rem;">
         <p v-if="activeCity === 'Berlin'">
-            Einwohner: ca. 3,7 Millionen<br>
-            Nextbike Fahrräder: 6400<br>
-            Fahrten pro Rad und Tag: 1
+            Residents: approx. 3.7 million<br>
+            Nextbike bikes: 6,400<br>
+            Trips per bike per day: 1
         </p>
         <p v-if="activeCity === 'Warschau'">
-            Einwohner: ca. 1,8 Millionen<br>
-            Nextbike Fahrräder: 5000<br>
-            Fahrten pro Rad und Tag: 2
+            Residents: approx. 1.8 million<br>
+            Nextbike bikes: 5,000<br>
+            Trips per bike per day: 2
         </p>
         <p v-if="activeCity === 'Bilbao'">
-            Einwohner: ca. 345.000<br>
-            Nextbike Fahrräder: 710<br>
-            Fahrten pro Rad und Tag: 10
+            Residents: approx. 345,000<br>
+            Nextbike bikes: 710<br>
+            Trips per bike per day: 10
         </p>
         <p v-if="activeCity === 'Dresden'">
-            Einwohner: ca. 550.000<br>
-            Nextbike Fahrräder: 1307<br>
-            Fahrten pro Rad und Tag: 5.7
+            Residents: approx. 550,000<br>
+            Nextbike bikes: 1,307<br>
+            Trips per bike per day: 5.7
         </p>
 </div>
 </div>
 <div class="spacer"></div>
 
-<h2>Weitere Informationen</h2>
+<h2>What Can I Learn?</h2>
+<ul>
+  <li><b>Hot Spots:</b>Discover which areas are most popular for bike usage.</li>
+  <li><b>Asymmetry:</b>Not all routes are used in both directions equally. This leads to imbalances within the system.</li>
+  <li><b>Intercity Trips:</b>Some times, bikes are repositioned between cities by users or the company.</li>
+  <!-- <li><b>:</b></li> -->
+</ul>
+<div class="spacer"></div>
 
-<div class="panel-content-flex">
+<h2>Further Information</h2>
+The results and dataset have been published within a scientific article at Springer Transportation. Please find the dataset and article linked below:
+<div class="panel-content-flex" style="align-items: stretch;">
 <div class="blue-frame">
     <a href="https://github.com/TUMFTM/european-bike-sharing-dataset" target="_blank" rel="noopener noreferrer">
         <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Repository" style="width:100px; display:block; margin: 0 auto;" />
@@ -124,20 +123,29 @@
 </div>
 <div  class="blue-frame">
     <a href="https://link.springer.com/article/10.1007/s11116-025-10661-2" target="_blank" rel="noopener noreferrer">
-        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="Paper Link" style="width:100px; display:block; margin: 0 auto;" />
+        <img src="https://media.springernature.com/w316/springer-static/cover-hires/journal/11116?as=webp" alt="Paper Link" style="width:100px; display:block; margin: 0 auto;" />
     </a>
 <br>
 <div>
-<p style="text-align: center">Artikel</p>
+<p style="text-align: center">Scientific Article</p>
 </div>
 </div>
 </div>
 
-<p><!-- Platzhalter: Hier kann später ein kurzer Hinweis auf Quelle/Publikation stehen. --></p>
+<p><!-- Placeholder: Add a short source/publication note here later. --></p>
 
 
 
         </div>
+    <div style="margin-top: 2rem; padding: 1rem; font-size: 12px; color: #666; border-top: 1px solid #ddd;">
+        <p style="margin: 0;">Built using <a href="https://github.com/visgl/flowmap.gl" target="_blank" rel="noopener noreferrer">flowmap.gl</a> and <a href="https://github.com/TUMFTM/sm-data-desk" target="_blank" rel="noopener noreferrer">sm-data-desk</a>
+        The authors are not affiliated with or endorsed by Nextbike. 
+        Website: <a href="http://linkedin.com/in/georgbalke" target="_blank" rel="noopener noreferrer">Georg Balke</a>. 
+        Research: <a href="https://www.linkedin.com/in/felix-waldner/" target="_blank" rel="noopener noreferrer">Felix Waldner</a>, 
+        <a href="http://linkedin.com/in/georgbalke" target="_blank" rel="noopener noreferrer">Georg Balke</a>, 
+        <a href="https://www.linkedin.com/in/martin-lellep-858600152/" target="_blank" rel="noopener noreferrer">Martin Lellep</a> 
+        and Felix Rech.</p>
+    </div>
     </div>
 </template>
 
