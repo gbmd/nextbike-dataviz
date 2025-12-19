@@ -8,7 +8,7 @@
   "minZoom": 4,
   "layers": [
     {
-      "name": "Analysierte Städte mit Mieträdern",
+      "name": "Surveyes Bike Sharing Systems",
       "path": "layers/city_data.geojson",
       "visible": true
     }

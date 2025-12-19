@@ -7,7 +7,7 @@
           maxHeight: (typeof inlineMaxHeight === 'number' ? inlineMaxHeight + 'px' : inlineMaxHeight) }
       : null"
   >
-    <h1 class="map-legend__header">Legende</h1>
+    <h1 class="map-legend__header">Legend</h1>
     <div v-if="isLoading" class="map-legend__content loading-message">Loading layers...</div>
     <div v-else class="map-legend__content">
       <div v-for="group in processedLayers" :key="group.id" class="legend-group">

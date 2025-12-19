@@ -1,6 +1,6 @@
 <template>
   <div class="outer-container d-flex flex-column">
-    <div class="legend-title">Legende</div>
+    <div class="legend-title">Legend</div>
     <!-- <hr class="info-divider" /> -->
     <div class="legend-content flex-fill h-100">
       <slot></slot>
