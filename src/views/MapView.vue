@@ -603,6 +603,7 @@ onUpdated(() => {
 .block-map {
   grid-area: map;
   overflow: hidden;
+  margin-top: -2rem;
 }
 
 .map-block-wrapper {
